@@ -17,7 +17,7 @@ RenameHandler.prototype.parsePackageName = function(filename) {
     var parser = new expat.Parser(this.encoding)
     parser.on('startElement', function (name, attrs) {
         if (name.match(/manifest/i)) {
-            console.log('found oldPackageName => ' attrs.package)
+            console.log('found oldPackageName => ' + attrs.package)
             self.oldPackageName = attrs.package
         }
     })
@@ -25,7 +25,7 @@ RenameHandler.prototype.parsePackageName = function(filename) {
     parser.on('error', function (error) {
         console.error(error)
     })
-    parser.write(content)
+    parser.write(fs.readFileSync(filepath))
 }
 
 RenameHandler.prototype.parseResource = function(filename) {
