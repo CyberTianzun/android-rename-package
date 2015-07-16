@@ -47,8 +47,6 @@ RenameHandler.prototype.parseResource = function(filename) {
         console.error(error)
     })
     parser.write(content)
-
-    // rewrite xml file
 }
 
 RenameHandler.prototype.parseJava = function(filename) {
