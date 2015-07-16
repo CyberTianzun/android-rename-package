@@ -4,12 +4,15 @@ var fs = require('fs'),
     path = require('path'),
     expat = require('node-expat')
 
-var RenameHandler = function(dir, encoding) {
+var RenameHandler = function (dir, encoding) {
     this.dir = dir
     this.encoding = encoding
+    this.errorHandler = function (error) {
+        console.error(error)
+    }
 }
 
-RenameHandler.prototype.parsePackageName = function(filename) {
+RenameHandler.prototype.parsePackageName = function (filename) {
     var self = this
     var filepath = path.join(this.dir, filename)
 
@@ -22,13 +25,11 @@ RenameHandler.prototype.parsePackageName = function(filename) {
         }
     })
 
-    parser.on('error', function (error) {
-        console.error(error)
-    })
+    parser.on('error', this.errorHandler)
     parser.write(fs.readFileSync(filepath))
 }
 
-RenameHandler.prototype.parseResource = function(filename) {
+RenameHandler.prototype.parseResource = function (filename) {
     // cache file to memory
     var filepath = path.join(this.dir, filename)
     var content = fs.readFileSync(filepath)
@@ -43,9 +44,26 @@ RenameHandler.prototype.parseResource = function(filename) {
         }
     })
 
-    parser.on('error', function (error) {
-        console.error(error)
+    parser.on('error', this.errorHandler)
+    parser.write(content)
+}
+
+RenameHandler.prototype.parseAndroidManifest = function (filename) {
+    // cache file to memory
+    var filepath = path.join(this.dir, filename)
+    var content = fs.readFileSync(filepath)
+
+    // sax parse xml file
+    var parser = new expat.Parser(this.encoding)
+    parser.on('startElement', function (name, attrs) {
+        for(var attrName in attrs) {
+            if (attrName.match(/^xmlns:/i)) {
+                console.log('found xml define: ' + attrName + " => " + attrs[attrName])
+            }
+        }
     })
+
+    parser.on('error', this.errorHandler)
     parser.write(content)
 }
 
