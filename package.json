@@ -1,0 +1,22 @@
+{
+  "name": "android-rename-package",
+  "version": "0.1.0",
+  "description": "Rename android app package name with code.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:cnzx219/android-rename-package.git"
+  },
+  "keywords": [
+    "android"
+  ],
+  "author": "Hiro",
+  "license": "Apache",
+  "dependencies": {
+        "node-expat": "~ 2.3.8",
+        "q": "~ 1.4.1"
+  }
+}
