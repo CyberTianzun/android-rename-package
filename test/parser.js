@@ -12,10 +12,14 @@ console.log('new package name => ' + newPackageName)
 rh.setNewPackageName(newPackageName)
 
 console.log('parse packageName: ')
-rh.parsePackageName('./usecase/testmanifest.xml')
+mp = rh.parsePackageName('./usecase/testmanifest.xml')
 
 console.log('parse resource: ')
 mp = rh.parseResource('./usecase/testresource.xml')
+console.log(mp)
+
+console.log('parse androidManifest: ')
+mp = rh.parseAndroidManifest('./usecase/testmanifest.xml')
 console.log(mp)
 
 console.log('parse java: ')

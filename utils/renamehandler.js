@@ -82,30 +82,42 @@ RenameHandler.prototype.parseAndroidManifest = function (filename) {
     // cache file to memory
     var filepath = path.join(this.dir, filename)
     var content = fs.readFileSync(filepath)
+    var lines = content.toString().split('\n')
+    var modifyPoints = [ ]
+    var currentLineNumber
 
     // sax parse xml file
     var parser = new expat.Parser(this.encoding)
     parser.on('startElement', function (name, attrs) {
-        for(var attrName in attrs) {
-            if (attrName.match(/provider/i)) {
-                if (attrs['android:authorities'] !== undefined) {
-                    console.log('found provider authorities need to modify => ' + attrs['android:authorities'])
-                } else {
-                    console.log('found provider need to add a special authorities => ' + attrs['android:name'])
-                }
-            } else if (attrName.match(/action/i)) {
-                if (attrs['android:name'] !== undefined) {
-                    // this action is not a system action
-                    if (attrs['android:name'].match(/^com\.android\.intent\.action\./)) {
-                        console.log('found action need to change => ' + attrs['android:name'])
-                    }
+        if (name.match(/provider/i)) {
+            if (attrs['android:authorities'] !== undefined) {
+                console.log('found provider authorities need to modify => ' + attrs['android:authorities'])
+                modifyPoints.push({
+                    'line' : currentLineNumber
+                })
+            } else {
+                console.log('found provider need to add a special authorities => ' + attrs['android:name'])
+            }
+        } else if (name.match(/action/i)) {
+            if (attrs['android:name'] !== undefined) {
+                // this action is not a system action
+                if (attrs['android:name'].match(/^com\.android\.intent\.action\./)) {
+                    console.log('found action need to change => ' + attrs['android:name'])
+                    modifyPoints.push({
+                        'line' : currentLineNumber
+                    })
                 }
             }
         }
     })
 
     parser.on('error', this.errorHandler)
-    parser.write(content)
+    for(var i in lines) {
+        currentLineNumber = i
+        parser.write(lines[i])
+    }
+    
+    return modifyPoints
 }
 
 // parse java file to list all the modify point about import line which is `.R` and `.BuildConfig`
