@@ -22,7 +22,7 @@ RenameHandler.prototype.setEncoding = function (encoding) {
 
 // parse package name from android manifest file
 // then set the value to `this.oldPackageName`
-RenameHandler.prototype.parsePackageName = function (filename) {
+RenameHandler.prototype.obtainPackageName = function (filename) {
     var self = this
     var filepath = path.join(this.dir, filename)
 

@@ -12,7 +12,7 @@ console.log('new package name => ' + newPackageName)
 rh.setNewPackageName(newPackageName)
 
 console.log('parse packageName: ')
-mp = rh.parsePackageName('./usecase/testmanifest.xml')
+mp = rh.obtainPackageName('./usecase/testmanifest.xml')
 
 console.log('parse resource: ')
 mp = rh.parseResource('./usecase/testresource.xml')
