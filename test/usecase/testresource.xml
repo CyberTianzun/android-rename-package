@@ -15,7 +15,7 @@
 -->
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:indicator="http://schemas.android.com/apk/res/cn.hiroz.android.test">
+    xmlns:indicator="http://schemas.android.com/apk/res/cn.hiroz.myapplication">
     <style name="Theme.PageIndicatorDefaults" parent="main_theme">
         <item name="vpiTabPageIndicatorStyle">@style/Widget.TabPageIndicator</item>
     </style>
