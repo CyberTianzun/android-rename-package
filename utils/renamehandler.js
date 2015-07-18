@@ -1,5 +1,6 @@
 'use strict';
 
+
 var fs = require('fs'), 
     path = require('path'),
     expat = require('node-expat')
@@ -47,7 +48,12 @@ RenameHandler.prototype.parseResource = function (filename) {
     var filepath = path.join(this.dir, filename)
     var content = fs.readFileSync(filepath)
     var lines = content.toString().split('\n')
-    var modifyPoints = [ ]
+    var modifyPoints = {
+        filename : filename,
+        filepath : filepath,
+        lines : lines,
+        'xmlns' : [ ]
+    }
     var currentLineNumber
 
     // sax parse xml file
@@ -57,21 +63,24 @@ RenameHandler.prototype.parseResource = function (filename) {
             if (attrName.match(/^xmlns:/i)) {
                 if (attrName.match(/xmlns:android/i) === null) {
                     console.log('found xml define: ' + attrName + " => " + attrs[attrName])
-                    modifyPoints.push({
+                    modifyPoints.xmlns.push({
                         'line' : currentLineNumber,
-                        'source' : attrName + '="' + attrs[attrName] + '"',
-                        'target' : attrName + '="' + attrs[attrName].replace(self.oldPackageName, self.newPackageName) + '"'
+                        'source' : attrName + '="' + attrs[attrName] + '"'
                     })
                 }
             }
         }
     })
 
-    parser.on('error', this.errorHandler)
+    parser.on('error', self.errorHandler)
 
     for(var i in lines) {
         currentLineNumber = i
         parser.write(lines[i])
+    }
+
+    if (modifyPoints.xmlns.length == 0) {
+        delete modifyPoints.xmlns
     }
 
     return modifyPoints
@@ -83,7 +92,13 @@ RenameHandler.prototype.parseAndroidManifest = function (filename) {
     var filepath = path.join(this.dir, filename)
     var content = fs.readFileSync(filepath)
     var lines = content.toString().split('\n')
-    var modifyPoints = [ ]
+    var modifyPoints = {
+        filename : filename,
+        filepath : filepath,
+        lines : lines,
+        providers : [ ],
+        actions : [ ]
+    }
     var currentLineNumber
 
     // sax parse xml file
@@ -92,19 +107,26 @@ RenameHandler.prototype.parseAndroidManifest = function (filename) {
         if (name.match(/provider/i)) {
             if (attrs['android:authorities'] !== undefined) {
                 console.log('found provider authorities need to modify => ' + attrs['android:authorities'])
-                modifyPoints.push({
-                    'line' : currentLineNumber
+                modifyPoints.providers.push({
+                    'line' : currentLineNumber,
+                    'source' : attrs['android:authorities']
                 })
             } else {
                 console.log('found provider need to add a special authorities => ' + attrs['android:name'])
+                modifyPoints.providers.push({
+                    'line' : currentLineNumber,
+                    'source' : '>',
+                    'action' : 'add'
+                })
             }
         } else if (name.match(/action/i)) {
             if (attrs['android:name'] !== undefined) {
                 // this action is not a system action
-                if (attrs['android:name'].match(/^com\.android\.intent\.action\./)) {
+                if (!attrs['android:name'].match(/^android\.intent\.action\./)) {
                     console.log('found action need to change => ' + attrs['android:name'])
-                    modifyPoints.push({
-                        'line' : currentLineNumber
+                    modifyPoints.actions.push({
+                        'line' : currentLineNumber,
+                        'source' : attrs['android:name']
                     })
                 }
             }
@@ -116,17 +138,30 @@ RenameHandler.prototype.parseAndroidManifest = function (filename) {
         currentLineNumber = i
         parser.write(lines[i])
     }
+
+    if (modifyPoints.providers.length == 0) {
+        delete modifyPoints.providers
+    }
+
+    if (modifyPoints.actions.length == 0) {
+        delete modifyPoints.actions
+    }
     
     return modifyPoints
 }
 
 // parse java file to list all the modify point about import line which is `.R` and `.BuildConfig`
-RenameHandler.prototype.parseJava = function(filename) {
+RenameHandler.prototype.parseJava = function (filename) {
     // cache file to memory
     var filepath = path.join(this.dir, filename)
     var content = fs.readFileSync(filepath)
     var lines = content.toString().split('\n')
-    var modifyPoints = [ ]
+    var modifyPoints = {
+        filename : filename,
+        filepath : filepath,
+        lines : lines,
+        'imports' : [ ]
+    }
 
     // read each line
     for(var i in lines) {
@@ -135,23 +170,79 @@ RenameHandler.prototype.parseJava = function(filename) {
         if (importClass) {
             if (importClass[1].match(this.oldPackageName + '.R')) {
                 console.log('found import line need to change => ' + this.oldPackageName + '.R')
-                modifyPoints.push({
+                modifyPoints.imports.push({
                     'line' : i,
-                    'source' : this.oldPackageName + '.R',
-                    'target' : this.newPackageName + '.R'
+                    'source' : this.oldPackageName + '.R'
                 })
             } else if (importClass[1].match(this.oldPackageName + '.BuildConfig')) {
                 console.log('found import line need to change => ' + this.oldPackageName + '.BuildConfig')
-                modifyPoints.push({
+                modifyPoints.imports.push({
                     'line' : i,
-                    'source' : this.oldPackageName + '.BuildConfig',
-                    'target' : this.newPackageName + '.BuildConfig'
+                    'source' : this.oldPackageName + '.BuildConfig'
                 })
             }
         }
     }
 
+    if (modifyPoints.imports.length == 0) {
+        delete modifyPoints.imports
+    }
+
     return modifyPoints
+}
+
+// rewrite resource file from modify points
+RenameHandler.prototype.rewriteResource = function(lines, modifyPoints, options) {
+    var self = this
+    if (modifyPoints.xmlns !== undefined) {
+        for(var modifyPoint in modifyPoints.xmlns) {
+            var lineNumber = modifyPoints.xmlns[modifyPoint].line
+            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
+            lines[lineNumber] = lines[lineNumber].replace(self.oldPackageName, self.newPackageName)
+            console.log('modify finished => ' + lines[lineNumber].trim())
+        }
+    }
+}
+
+RenameHandler.prototype.rewriteAndroidManifest = function (lines, modifyPoints, options) {
+    var self = this
+
+    if (options.modifyProviders && modifyPoints.providers) {
+        for(var modifyPoint in modifyPoints.providers) {
+
+        }
+    }
+
+    if (options.modifyActions && modifyPoints.actions) {
+        for(var modifyPoint in modifyPoints.actions) {
+
+        }
+    }
+}
+
+RenameHandler.prototype.rewriteJava = function (lines, modifyPoints, options) {
+    var self = this
+
+    if (modifyPoints.imports !== undefined) {
+        for(var modifyPoint in modifyPoints.imports) {
+            var lineNumber = modifyPoints.imports[modifyPoint].line
+            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
+            lines[lineNumber] = lines[lineNumber].replace(self.oldPackageName, self.newPackageName)
+            console.log('modify finished => ' + lines[lineNumber].trim())
+        }
+    }
+
+    // TODO: modify ContentProvider in java files
+    // such a string which contains 'content://xxxxx.xxxxx'
+    if (options.modifyProviders) {
+
+    }
+
+    // TODO: modify Action in java files
+    // such a string which contains 'ACTION_NAME'
+    if (options.modifyActions) {
+        
+    }
 }
 
 module.exports = RenameHandler

@@ -16,12 +16,13 @@ mp = rh.obtainPackageName('./usecase/testmanifest.xml')
 
 console.log('parse resource: ')
 mp = rh.parseResource('./usecase/testresource.xml')
-console.log(mp)
+console.log('rewrite resource: ')
+rh.rewriteResource(mp.lines, mp, { })
 
 console.log('parse androidManifest: ')
 mp = rh.parseAndroidManifest('./usecase/testmanifest.xml')
-console.log(mp)
+rh.rewriteAndroidManifest(mp.lines, mp, { })
 
 console.log('parse java: ')
 mp = rh.parseJava('./usecase/testjava.java')
-console.log(mp)
+rh.rewriteJava(mp.lines, mp, { })
