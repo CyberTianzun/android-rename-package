@@ -206,18 +206,40 @@ RenameHandler.prototype.rewriteResource = function(lines, modifyPoints, options)
 
 RenameHandler.prototype.rewriteAndroidManifest = function (lines, modifyPoints, options) {
     var self = this
+    if (self.modifyPointsCahce === undefined) {
+        self.modifyPointsCahce = {
+            'providers' : [ ],
+            'actions' : [ ]
+        }
+    }
 
-    if (options.modifyProviders && modifyPoints.providers) {
+    if (options && options.modifyProviders && modifyPoints.providers) {
         for(var modifyPoint in modifyPoints.providers) {
-
+            var lineNumber = modifyPoints.providers[modifyPoint].line
+            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
+            self.modifyPointsCahce.providers.push(modifyPoints.providers[modifyPoint])
+            console.log('modify finished => ' + lines[lineNumber].trim())
         }
     }
 
-    if (options.modifyActions && modifyPoints.actions) {
+    if (options && options.modifyActions && modifyPoints.actions) {
         for(var modifyPoint in modifyPoints.actions) {
-
+            var lineNumber = modifyPoints.actions[modifyPoint].line
+            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
+            self.modifyPointsCahce.actions.push(modifyPoints.actions[modifyPoint])
+            console.log('modify finished => ' + lines[lineNumber].trim())
         }
     }
+
+    if (self.modifyPointsCahce.providers.length == 0) {
+        delete self.modifyPointsCahce.providers
+    }
+
+    if (self.modifyPointsCahce.actions.length == 0) {
+        delete self.modifyPointsCahce.actions
+    }
+    
+    self.modifyPointsCahce = modifyPointsCahce
 }
 
 RenameHandler.prototype.rewriteJava = function (lines, modifyPoints, options) {
@@ -234,13 +256,13 @@ RenameHandler.prototype.rewriteJava = function (lines, modifyPoints, options) {
 
     // TODO: modify ContentProvider in java files
     // such a string which contains 'content://xxxxx.xxxxx'
-    if (options.modifyProviders) {
+    if (options && options.modifyProviders && self.modifyPointsCahce && self.modifyPointsCahce.providers) {
 
     }
 
     // TODO: modify Action in java files
     // such a string which contains 'ACTION_NAME'
-    if (options.modifyActions) {
+    if (options && options.modifyActions && self.modifyPointsCahce && self.modifyPointsCahce.actions) {
         
     }
 }
