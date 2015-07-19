@@ -1,13 +1,14 @@
 'use strict';
 
-
 var fs = require('fs'), 
     path = require('path'),
-    expat = require('node-expat')
+    expat = require('node-expat'),
+    writeLines = require('./writeline.js')
 
 var RenameHandler = function (dir, encoding) {
     this.dir = dir
     this.encoding = encoding
+    this.returnSymbol = '\n'
     this.errorHandler = function (error) {
         console.error(error)
     }
@@ -201,11 +202,17 @@ RenameHandler.prototype.rewriteResource = function(lines, modifyPoints, options)
             lines[lineNumber] = lines[lineNumber].replace(self.oldPackageName, self.newPackageName)
             console.log('modify finished => ' + lines[lineNumber].trim())
         }
+
+        writeLines(modifyPoints.filepath, lines, self.encoding, self.returnSymbol)
+    } else {
+        console.log('skip ' + modifyPoints.filename)
     }
 }
 
 RenameHandler.prototype.rewriteAndroidManifest = function (lines, modifyPoints, options) {
     var self = this
+    var modifiedFlag = false
+
     if (self.modifyPointsCahce === undefined) {
         self.modifyPointsCahce = {
             'providers' : [ ],
@@ -213,7 +220,8 @@ RenameHandler.prototype.rewriteAndroidManifest = function (lines, modifyPoints, 
         }
     }
 
-    if (options && options.modifyProviders && modifyPoints.providers) {
+    if (options && options.modifyProviders && modifyPoints.providers && modifyPoints.providers.length > 0) {
+        modifiedFlag = true
         for(var modifyPoint in modifyPoints.providers) {
             var lineNumber = modifyPoints.providers[modifyPoint].line
             console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
@@ -222,7 +230,8 @@ RenameHandler.prototype.rewriteAndroidManifest = function (lines, modifyPoints, 
         }
     }
 
-    if (options && options.modifyActions && modifyPoints.actions) {
+    if (options && options.modifyActions && modifyPoints.actions && modifyPoints.actions.length > 0) {
+        modifiedFlag = true
         for(var modifyPoint in modifyPoints.actions) {
             var lineNumber = modifyPoints.actions[modifyPoint].line
             console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
@@ -238,14 +247,20 @@ RenameHandler.prototype.rewriteAndroidManifest = function (lines, modifyPoints, 
     if (self.modifyPointsCahce.actions.length == 0) {
         delete self.modifyPointsCahce.actions
     }
-    
-    self.modifyPointsCahce = modifyPointsCahce
+
+    if (modifiedFlag) {
+        writeLines(modifyPoints.filepath, lines, self.encoding, self.returnSymbol)
+    } else {
+        console.log('skip ' + modifyPoints.filepath)
+    }
 }
 
 RenameHandler.prototype.rewriteJava = function (lines, modifyPoints, options) {
     var self = this
+    var modifiedFlag = false
 
-    if (modifyPoints.imports !== undefined) {
+    if (modifyPoints.imports !== undefined && modifyPoints.imports.length > 0) {
+        modifiedFlag = true
         for(var modifyPoint in modifyPoints.imports) {
             var lineNumber = modifyPoints.imports[modifyPoint].line
             console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
@@ -257,13 +272,19 @@ RenameHandler.prototype.rewriteJava = function (lines, modifyPoints, options) {
     // TODO: modify ContentProvider in java files
     // such a string which contains 'content://xxxxx.xxxxx'
     if (options && options.modifyProviders && self.modifyPointsCahce && self.modifyPointsCahce.providers) {
-
+        
     }
 
     // TODO: modify Action in java files
     // such a string which contains 'ACTION_NAME'
     if (options && options.modifyActions && self.modifyPointsCahce && self.modifyPointsCahce.actions) {
         
+    }
+
+    if (modifiedFlag) {
+        writeLines(modifyPoints.filepath, lines, self.encoding, self.returnSymbol)
+    } else {
+        console.log('skip ' + modifyPoints.filepath)
     }
 }
 
