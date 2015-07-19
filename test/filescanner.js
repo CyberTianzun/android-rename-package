@@ -3,7 +3,10 @@
 var path = require('path'),
     FileScanner = require('../utils/filescanner.js')
 
-var fs = new FileScanner(__dirname)
+var rootDir = __dirname
+
+console.log('scan root dir => ' + rootDir)
+var fs = new FileScanner(rootDir)
 
 fs.each(function(currentPath, relativePath, filename) {
     if (filename.match(/\.java$/i)) {
