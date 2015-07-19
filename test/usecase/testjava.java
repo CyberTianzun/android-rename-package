@@ -1,7 +1,7 @@
 package cn.hiroz.myapplication;
 
-import cn.hiroz.myapplication.R;
-import cn.hiroz.myapplication.BuildConfig;
+import cn.hiroz.android.test.project.R;
+import cn.hiroz.android.test.project.BuildConfig;
 
 public class testjava {
 
