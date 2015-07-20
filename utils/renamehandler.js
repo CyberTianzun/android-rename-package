@@ -27,6 +27,15 @@ RenameHandler.prototype.setEncoding = function (encoding) {
 RenameHandler.prototype.obtainPackageName = function (filename) {
     var self = this
     var filepath = path.join(this.dir, filename)
+    var content = fs.readFileSync(filepath)
+    var lines = content.toString().split('\n')
+    var modifyPoints = {
+        filename : filename,
+        filepath : filepath,
+        lines : lines,
+        'packages' : [ ]
+    }
+    var currentLineNumber
 
     // sax parse xml file
     var parser = new expat.Parser(this.encoding)
@@ -38,7 +47,17 @@ RenameHandler.prototype.obtainPackageName = function (filename) {
     })
 
     parser.on('error', this.errorHandler)
-    parser.write(fs.readFileSync(filepath))
+    
+    for(var i in lines) {
+        currentLineNumber = i
+        parser.write(lines[i])
+    }
+
+    if (modifyPoints.packages.length == 0) {
+        delete modifyPoints.packages
+    }
+
+    return modifyPoints
 }
 
 // parse resource to list all the modify point about custom xmlns defines
@@ -203,9 +222,9 @@ RenameHandler.prototype.rewriteResource = function(lines, modifyPoints, options)
     if (modifyPoints.xmlns !== undefined) {
         for(var modifyPoint in modifyPoints.xmlns) {
             var lineNumber = modifyPoints.xmlns[modifyPoint].line
-            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
-            lines[lineNumber] = lines[lineNumber].replace(self.oldPackageName, self.newPackageName)
-            console.log('modify finished => ' + lines[lineNumber].trim())
+            var newLine = lines[lineNumber].replace(self.oldPackageName, self.newPackageName)
+            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') ' + lines[lineNumber].trim() + ' -> ' + newLine.trim())
+            lines[lineNumber] = newLine
         }
 
         writeLines(modifyPoints.filepath, lines, self.encoding, self.returnSymbol)
@@ -227,13 +246,23 @@ RenameHandler.prototype.rewriteAndroidManifest = function (lines, modifyPoints, 
         }
     }
 
+    if (modifyPoints.packages && modifyPoints.packages.length > 0) {
+        modifiedFlag = true
+
+        for(var modifyPoint in modifyPoints.packages) {
+            var lineNumber = modifyPoints.packages[modifyPoint].line
+            var newLine = lines[lineNumber].replace(self.oldPackageName, self.newPackageName)
+            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') ' + lines[lineNumber].trim() + ' -> ' + newLine.trim())
+            lines[lineNumber] = newLine
+        }
+    }
+
     if (options && options.modifyProviders && modifyPoints.providers && modifyPoints.providers.length > 0) {
         modifiedFlag = true
         for(var modifyPoint in modifyPoints.providers) {
             var lineNumber = modifyPoints.providers[modifyPoint].line
-            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
             self.modifyPointsCahce.providers.push(modifyPoints.providers[modifyPoint])
-            console.log('modify finished => ' + lines[lineNumber].trim())
+            //TODO: modify providers
         }
     }
 
@@ -241,9 +270,8 @@ RenameHandler.prototype.rewriteAndroidManifest = function (lines, modifyPoints, 
         modifiedFlag = true
         for(var modifyPoint in modifyPoints.actions) {
             var lineNumber = modifyPoints.actions[modifyPoint].line
-            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
             self.modifyPointsCahce.actions.push(modifyPoints.actions[modifyPoint])
-            console.log('modify finished => ' + lines[lineNumber].trim())
+            //TODO: modify actions
         }
     }
 
@@ -272,9 +300,9 @@ RenameHandler.prototype.rewriteJava = function (lines, modifyPoints, options) {
         modifiedFlag = true
         for(var modifyPoint in modifyPoints.imports) {
             var lineNumber = modifyPoints.imports[modifyPoint].line
-            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') => ' + lines[lineNumber].trim())
-            lines[lineNumber] = lines[lineNumber].replace(self.oldPackageName, self.newPackageName)
-            console.log('modify finished => ' + lines[lineNumber].trim())
+            var newLine = lines[lineNumber].replace(self.oldPackageName, self.newPackageName)
+            console.log('modify point (' + modifyPoints.filename + ': ' + lineNumber + ') ' + lines[lineNumber].trim() + ' -> ' + newLine.trim())
+            lines[lineNumber] = newLine
         }
     }
 

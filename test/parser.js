@@ -13,6 +13,7 @@ rh.setNewPackageName(newPackageName)
 
 console.log('parse packageName: ')
 mp = rh.obtainPackageName('./usecase/testmanifest.xml')
+rh.rewriteAndroidManifest(mp.lines, mp, { })
 
 console.log('parse resource: ')
 mp = rh.parseResource('./usecase/testresource.xml')

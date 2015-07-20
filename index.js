@@ -86,10 +86,12 @@ console.log('init configuration')
 console.log(options)
 
 var rh = new RenameHandler(options.rootDir, 'utf-8')
-rh.setNewPackageName(options.newPackageName)
-rh.obtainPackageName(path.join(options.mainProject, 'AndroidManifest.xml'))
-
 var mp
+
+rh.setNewPackageName(options.newPackageName)
+
+mp = rh.obtainPackageName(path.join(options.mainProject, 'AndroidManifest.xml'))
+rh.rewriteAndroidManifest(mp.lines, mp, options)
 
 for(var i in options.projects) {
     mp = rh.parseAndroidManifest(path.join(options.projects[i], 'AndroidManifest.xml'))
