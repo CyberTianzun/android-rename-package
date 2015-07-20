@@ -94,7 +94,9 @@ var mp
 for(var i in options.projects) {
     mp = rh.parseAndroidManifest(path.join(options.projects[i], 'AndroidManifest.xml'))
     rh.rewriteAndroidManifest(mp.lines, mp, options)
+}
 
+for(var i in options.projects) {
     var resPath = path.join(options.rootDir, path.join(options.projects[i], 'res'))
 
     FileScanner.each(resPath, function (currentPath, relativePath, filename) {
@@ -114,4 +116,3 @@ for(var i in options.projects) {
         }
     })
 }
-
