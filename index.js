@@ -17,12 +17,17 @@ for(var i = 2; i < process.argv.length; i++) {
     if (process.argv[i].match(/^node$/i)) {
         i++
         continue
+    } else if (process.argv[i].match(/^--?v(erbose)?$/i)) {
+        options.verbose = true
     } else if (process.argv[i].match(/^--?with-providers/i)) {
         options.modifyProviders = true
     } else if (process.argv[i].match(/^--?with-actions/i)) {
         options.modifyActions = true
     } else if (process.argv[i].match(/^--?prjtype/i)) {
         options.projectType = process.argv[i + 1]
+        i++
+    } else if (process.argv[i].match(/^--?main-project/)) {
+        options.mainProject = process.argv[i + 1]
         i++
     } else {
         if (options.rootDir === undefined) {
@@ -46,11 +51,67 @@ for(var i = 2; i < process.argv.length; i++) {
     }
 }
 
-console.log('init configuration')
-console.log(options)
-
 var FileScanner = require('./utils/filescanner.js'),
     RenameHandler = require('./utils/renamehandler.js')
 
+var detectProjects = function (dir) {
+    options.projects = [ ]
+    if (fs.existsSync(path.join(dir, 'settings.gradle'))) {
+        var lines = fs.readFileSync(path.join(dir, 'settings.gradle')).toString().split('\n')
+        for(var i in lines) {
+            if (lines[i].trim().match(/^include '.+'$/i)) {
+                var projectPath = lines[i].trim().match(/^include ':(.+)'$/i)[1].replace(':', '/')
+                options.projects.push(projectPath)
+                if (options.mainProject === undefined && projectPath.match(/app/i)) {
+                    options.mainProject = projectPath
+                }
+            }
+        }
+    }
+}
 
+detectProjects(options.rootDir)
+
+if (options.projects.length == 0) {
+    console.log('found not any project')
+    process.exit(-1)
+}
+
+if (options.mainProject === undefined) {
+    console.log('cannot detect main project, u can use --main-project to set this value manually')
+    process.exit(-1)
+}
+
+console.log('init configuration')
+console.log(options)
+
+var rh = new RenameHandler(options.rootDir, 'utf-8')
+rh.setNewPackageName(options.newPackageName)
+rh.obtainPackageName(path.join(options.mainProject, 'AndroidManifest.xml'))
+
+var mp
+
+for(var i in options.projects) {
+    mp = rh.parseAndroidManifest(path.join(options.projects[i], 'AndroidManifest.xml'))
+    rh.rewriteAndroidManifest(mp.lines, mp, options)
+
+    var resPath = path.join(options.rootDir, path.join(options.projects[i], 'res'))
+
+    FileScanner.each(resPath, function (currentPath, relativePath, filename) {
+        if (filename.match(/\.xml$/i)) {
+            var resFile = path.join(path.join(options.projects[i], 'res'), path.join(relativePath, filename))
+            mp = rh.parseResource(resFile)
+            rh.rewriteResource(mp.lines, mp, options)
+        }
+    })
+
+    var srcPath = path.join(options.rootDir, path.join(options.projects[i], 'src'))
+    FileScanner.each(srcPath, function (currentPath, relativePath, filename) {
+        if (filename.match(/\.java$/i)) {
+            var srcFile = path.join(path.join(options.projects[i], 'src'), path.join(relativePath, filename))
+            mp = rh.parseJava(srcFile)
+            rh.rewriteJava(mp.lines, mp, options)
+        }
+    })
+}
 

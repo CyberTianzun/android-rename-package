@@ -62,13 +62,18 @@ RenameHandler.prototype.parseResource = function (filename) {
     parser.on('startElement', function (name, attrs) {
         for(var attrName in attrs) {
             if (attrName.match(/^xmlns:/i)) {
-                if (attrName.match(/xmlns:android/i) === null) {
-                    console.log('found xml define: ' + attrName + " => " + attrs[attrName])
-                    modifyPoints.xmlns.push({
-                        'line' : currentLineNumber,
-                        'source' : attrName + '="' + attrs[attrName] + '"'
-                    })
+                if (attrs[attrName].match('http://schemas.android.com/apk/res-auto')) {
+                    continue
+                } else if (attrs[attrName].match('http://schemas.android.com/apk/res/android')) {
+                    continue
+                } else if (attrs[attrName].match('http://schemas.android.com/tools')) {
+                    continue
                 }
+                console.log('found xml define: ' + attrName + " => " + attrs[attrName])
+                modifyPoints.xmlns.push({
+                    'line' : currentLineNumber,
+                    'source' : attrs[attrName]
+                })
             }
         }
     })
@@ -205,7 +210,9 @@ RenameHandler.prototype.rewriteResource = function(lines, modifyPoints, options)
 
         writeLines(modifyPoints.filepath, lines, self.encoding, self.returnSymbol)
     } else {
-        console.log('skip ' + modifyPoints.filename)
+        if (options.verbose) {
+            console.log('skip ' + modifyPoints.filepath)    
+        }
     }
 }
 
@@ -240,18 +247,20 @@ RenameHandler.prototype.rewriteAndroidManifest = function (lines, modifyPoints, 
         }
     }
 
-    if (self.modifyPointsCahce.providers.length == 0) {
+    if (self.modifyPointsCahce && self.modifyPointsCahce.providers && self.modifyPointsCahce.providers.length == 0) {
         delete self.modifyPointsCahce.providers
     }
 
-    if (self.modifyPointsCahce.actions.length == 0) {
+    if (self.modifyPointsCahce && self.modifyPointsCahce.actions && self.modifyPointsCahce.actions.length == 0) {
         delete self.modifyPointsCahce.actions
     }
 
     if (modifiedFlag) {
         writeLines(modifyPoints.filepath, lines, self.encoding, self.returnSymbol)
     } else {
-        console.log('skip ' + modifyPoints.filepath)
+        if (options.verbose) {
+            console.log('skip ' + modifyPoints.filepath)    
+        }
     }
 }
 
@@ -284,7 +293,9 @@ RenameHandler.prototype.rewriteJava = function (lines, modifyPoints, options) {
     if (modifiedFlag) {
         writeLines(modifyPoints.filepath, lines, self.encoding, self.returnSymbol)
     } else {
-        console.log('skip ' + modifyPoints.filepath)
+        if (options.verbose) {
+            console.log('skip ' + modifyPoints.filepath)    
+        }
     }
 }
 

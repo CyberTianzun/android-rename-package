@@ -3,13 +3,7 @@
 var fs = require('fs'),
     path = require('path')
 
-var FileScanner = function (dir) {
-    this.rootDir = dir
-}
-
-FileScanner.prototype.each = function (callback) {
-    var self = this
-
+var each = function (rootDir, callback) {
     var handler = function (currentPath, relativePath, filename) {
         var fileStat = fs.statSync(currentPath)
         if (fileStat.isDirectory()) {
@@ -23,7 +17,7 @@ FileScanner.prototype.each = function (callback) {
         }
     }
 
-    handler(self.rootDir, '.', '.')
+    handler(rootDir, '.', '.')
 }
 
-module.exports = FileScanner
+module.exports.each = each
