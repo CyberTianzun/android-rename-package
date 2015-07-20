@@ -2,11 +2,33 @@
 
 ## Introduction
 
-This is a CLI tools for renaming android app package name with code.
+   This is a CLI tools for renaming android app package name with code.
 
-## Installation && Useage
+## Installation
 
-Coming soon
+### Git
+
+   Clone this repository
+
+   ```
+   https://github.com/cnzx219/android-rename-package.git
+   ```
+
+## Useage
+
+   Now it's just a develop version. Only support something simple project.
+
+   Open your terminal, type the following command:
+
+   ```
+   node index {projectPath} {newPackageName}
+   ```
+
+   For example, 
+
+   ```
+   node index /Users/hiro/online/shouzhu/newpackagename com.test.appstore
+   ```
 
 ## Copyrights
 
