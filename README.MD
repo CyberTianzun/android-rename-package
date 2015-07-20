@@ -14,7 +14,7 @@
    https://github.com/cnzx219/android-rename-package.git
    ```
 
-## Useage
+## Usage
 
    Now it's just a develop version. Only support something simple project.
 
