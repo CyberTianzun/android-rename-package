@@ -43,6 +43,10 @@ RenameHandler.prototype.obtainPackageName = function (filename) {
         if (name.match(/manifest/i)) {
             console.log('found oldPackageName => ' + attrs.package)
             self.oldPackageName = attrs.package
+            modifyPoints.packages.push({
+                'line' : currentLineNumber,
+                'source' : lines[currentLineNumber]
+            })
         }
     })
 
