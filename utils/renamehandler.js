@@ -79,6 +79,7 @@ RenameHandler.prototype.parseResource = function (filename) {
         'xmlns' : [ ]
     }
     var currentLineNumber
+    var preLineNumber = 0
 
     // sax parse xml file
     var parser = new expat.Parser(this.encoding)
@@ -94,11 +95,17 @@ RenameHandler.prototype.parseResource = function (filename) {
                 }
                 console.log('found xml define: ' + attrName + " => " + attrs[attrName])
                 modifyPoints.xmlns.push({
+                    'preLine' : preLineNumber,
                     'line' : currentLineNumber,
                     'source' : attrs[attrName]
                 })
             }
         }
+        preLineNumber = currentLineNumber
+    })
+
+    parser.on('endElement', function (name) {
+        preLineNumber = currentLineNumber
     })
 
     parser.on('error', self.errorHandler)
@@ -126,43 +133,79 @@ RenameHandler.prototype.parseAndroidManifest = function (filename) {
         filepath : filepath,
         lines : lines,
         providers : [ ],
-        actions : [ ]
+        actions : [ ],
+        processes : [ ]
     }
     var currentLineNumber
+    var preLineNumber = 0
 
     // sax parse xml file
     var parser = new expat.Parser(this.encoding)
     parser.on('startElement', function (name, attrs) {
-        if (name.match(/provider/i)) {
+        if (name.match('provider')) {
+            var target
             if (attrs['android:authorities'] !== undefined) {
                 console.log('found provider authorities need to modify => ' + attrs['android:authorities'])
                 modifyPoints.providers.push({
+                    'preLine' : preLineNumber,
                     'line' : currentLineNumber,
-                    'source' : attrs['android:authorities']
+                    'source' : attrs['android:authorities'],
+                    'target' : target
                 })
             } else {
                 console.log('found provider need to add a special authorities => ' + attrs['android:name'])
                 modifyPoints.providers.push({
                     'line' : currentLineNumber,
                     'source' : '>',
-                    'action' : 'add'
+                    'action' : 'add',
+                    'target' : target
                 })
             }
-        } else if (name.match(/action/i)) {
+        } else if (name.match('action')) {
             if (attrs['android:name'] !== undefined) {
                 // this action is not a system action
                 if (!attrs['android:name'].match(/^android\.intent\.action\./)) {
                     console.log('found action need to change => ' + attrs['android:name'])
+                    var target
+                    if (attrs['android:name'].match(self.oldPackageName)) {
+                        target = attrs['android:name'].replace(self.oldPackageName, self.newPackageName)
+                    } else {
+                        target = self.newPackageName + '.' + attrs['android:name']
+                    }
                     modifyPoints.actions.push({
+                        'preLine' : preLineNumber,
                         'line' : currentLineNumber,
-                        'source' : attrs['android:name']
+                        'source' : attrs['android:name'],
+                        'target' : target
                     })
                 }
             }
+        } else if (name.match('service')) {
+            if (attrs['android:process'] !== undefined) {
+                console.log('found service process need to change => ' + attrs['android:process'])
+                var target
+                if (attrs['android:process'].match(self.oldPackageName)) {
+                    target = attrs['android:process'].replace(self.oldPackageName, self.newPackageName)
+                } else {
+                    target = self.newPackageName + '.' + attrs['android:process']
+                }
+                modifyPoints.processes.push({
+                    'preLine' : preLineNumber,
+                    'line' : currentLineNumber,
+                    'source' : attrs['android:process'],
+                    'target' : target
+                })
+            }
         }
+        preLineNumber = currentLineNumber
+    })
+
+    parser.on('endElement', function (name) {
+        preLineNumber = currentLineNumber
     })
 
     parser.on('error', this.errorHandler)
+
     for(var i in lines) {
         currentLineNumber = i
         parser.write(lines[i])
@@ -174,6 +217,10 @@ RenameHandler.prototype.parseAndroidManifest = function (filename) {
 
     if (modifyPoints.actions.length == 0) {
         delete modifyPoints.actions
+    }
+
+    if (modifyPoints.processes.length == 0) {
+        delete modifyPoints.processes
     }
     
     return modifyPoints
