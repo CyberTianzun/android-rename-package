@@ -1,10 +1,14 @@
 {
   "name": "android-rename-package",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Rename android app package name with code.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "preferGlobal" : true,
+  "bin" : {
+    "rp" : "./bin/rp-cli"
   },
   "repository": {
     "type": "git",
@@ -13,10 +17,16 @@
   "keywords": [
     "android"
   ],
-  "author": "Hiro",
+  "author": "Hiro <admin@hiroz.cn> (http://hiroz.cn)",
   "license": "Apache",
   "dependencies": {
         "node-expat": "~ 2.3.8",
-        "q": "~ 1.4.1"
+        "q": "~ 1.4.1",
+        "commander" : "~ 2.8.1"
+  },
+  "rp" : {
+    "extensions" : {
+      "arp-test" : [ "test" ]
+    }
   }
 }

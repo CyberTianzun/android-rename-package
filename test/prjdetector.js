@@ -1,7 +1,7 @@
 'use strict';
 
 var path = require('path'),
-    ProjectDetector = require('../utils/prjdetector.js')
+    ProjectDetector = require('../lib/core/prjdetector.js')
 
 var rootDir = '/Users/hiro/online/poorword'
 

@@ -1,7 +1,7 @@
 'use strict';
 
 var path = require('path'),
-    RenameHandler = require('../utils/renamehandler.js')
+    RenameHandler = require('../lib/core/renamehandler.js')
 
 var rh = new RenameHandler(__dirname, "utf-8")
 var mp

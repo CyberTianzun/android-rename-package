@@ -1,7 +1,7 @@
 'use strict';
 
 var path = require('path'),
-    FileScanner = require('../utils/filescanner.js')
+    FileScanner = require('../lib/scanner/pathscanner.js')
 
 var rootDir = __dirname
 

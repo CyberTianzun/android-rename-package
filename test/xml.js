@@ -20,6 +20,12 @@ parser.on('endElement', function (name) {
     
 })
 
+parser.on('processingInstruction', function (target, data) {
+  console.log('processingInstruction')
+  console.log(target)
+  console.log(data)
+})
+
 parser.on('text', function (text) {
     console.log(text)
 })
