@@ -23,7 +23,10 @@ var context = {
     },
     encoding : 'utf-8',
     returnSymbol : '\n',
-    verbose : true
+    verbose : true,
+    modifyProvider : true,
+    modifyAction : true,
+    modifyService : true
 }
 
 manifestHandler.obtainPackageName(path.join(__dirname, "usecase/testmanifest.xml"), context)
