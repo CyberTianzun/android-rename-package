@@ -1,29 +1,31 @@
 'use strict';
 
 var path = require('path'),
-    RenameHandler = require('../lib/core/renamehandler.js')
+    manifestHandler = require('../lib/handler/manifesthandler.js'),
+    defaultPolicy = require('../lib/core/defaultpolicy.js')
 
-var rh = new RenameHandler(__dirname, "utf-8")
-var mp
+var context = {
+    newPackageName : 'com.qihoo.appstore',
+    policy : defaultPolicy,
+    log : {
+        i : function(s) {
+            console.log('i: ' + s)
+        },
+        w : function(s) {
+            console.log('w: ' + s)
+        },
+        e : function(s) {
+            console.log('e: ' + s)
+        },
+        d : function(s) {
+            console.log('d: ' + s)
+        }
+    },
+    encoding : 'utf-8',
+    returnSymbol : '\n',
+    verbose : true
+}
 
-var newPackageName = 'cn.hiroz.android.test.project'
+manifestHandler.obtainPackageName(path.join(__dirname, "usecase/testmanifest.xml"), context)
 
-console.log('new package name => ' + newPackageName)
-rh.setNewPackageName(newPackageName)
-
-console.log('parse packageName: ')
-mp = rh.obtainPackageName('./usecase/testmanifest.xml')
-rh.rewriteAndroidManifest(mp.lines, mp, { })
-
-console.log('parse resource: ')
-mp = rh.parseResource('./usecase/testresource.xml')
-console.log('rewrite resource: ')
-rh.rewriteResource(mp.lines, mp, { })
-
-console.log('parse androidManifest: ')
-mp = rh.parseAndroidManifest('./usecase/testmanifest.xml')
-rh.rewriteAndroidManifest(mp.lines, mp, { })
-
-console.log('parse java: ')
-mp = rh.parseJava('./usecase/testjava.java')
-rh.rewriteJava(mp.lines, mp, { })
+manifestHandler.rewrite(path.join(__dirname, "usecase/testmanifest.xml"), context)
