@@ -33,8 +33,8 @@ var context = {
 
 manifestHandler.obtainPackageName(path.join(__dirname, "usecase/testmanifest.xml"), context)
 
-// manifestHandler.rewrite(path.join(__dirname, "usecase/testmanifest.xml"), context)
+manifestHandler.rewrite(path.join(__dirname, "usecase/testmanifest.xml"), context)
 
-// resourceHandler.rewrite(path.join(__dirname, "usecase/testresource.xml"), context)
+resourceHandler.rewrite(path.join(__dirname, "usecase/testresource.xml"), context)
 
 javaHandler.rewrite(path.join(__dirname, "usecase/testjava.java"), context)
