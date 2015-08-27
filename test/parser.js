@@ -2,6 +2,8 @@
 
 var path = require('path'),
     manifestHandler = require('../lib/handler/manifesthandler.js'),
+    resourceHandler = require('../lib/handler/resourcehandler.js'),
+    javaHandler = require('../lib/handler/javahandler.js'),
     defaultPolicy = require('../lib/core/defaultpolicy.js')
 
 var context = {
@@ -31,4 +33,8 @@ var context = {
 
 manifestHandler.obtainPackageName(path.join(__dirname, "usecase/testmanifest.xml"), context)
 
-manifestHandler.rewrite(path.join(__dirname, "usecase/testmanifest.xml"), context)
+// manifestHandler.rewrite(path.join(__dirname, "usecase/testmanifest.xml"), context)
+
+// resourceHandler.rewrite(path.join(__dirname, "usecase/testresource.xml"), context)
+
+javaHandler.rewrite(path.join(__dirname, "usecase/testjava.java"), context)
