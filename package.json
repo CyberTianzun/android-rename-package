@@ -1,5 +1,5 @@
 {
-  "name": "android-rename-package",
+  "name": "android-rename",
   "version": "1.0.0",
   "description": "Rename android app package name with code.",
   "main": "index.js",
