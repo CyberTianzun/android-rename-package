@@ -1,4 +1,4 @@
-# Android-Rename-Package
+# Android-Rename
 
 ## Introduction
 
@@ -6,42 +6,84 @@
 
 ## Installation
 
-### Git
+### NPM
 
-   Clone this repository
+   Android-Rename-Package is based on nodejs. You may install node.js before use it. Then install this tools.
 
    ```
-   https://github.com/cnzx219/android-rename-package.git
+   npm -g install android-rename
+   ```
+
+### Git
+
+   You can download this repo, and use npm local install.
+
+   ```
+   git clone https://github.com/cnzx219/android-rename-package.git
+   cd android-rename-package
+   npm -g install
    ```
 
 ## Usage
 
-   Now it's just a develop version. Only support something simple project.
-
    Open your terminal, type the following command:
 
    ```
-   node index {projectPath} {newPackageName}
+   rp r <projectDir> --package-name <newPackageName>
    ```
 
    For example, 
 
    ```
-   node index /Users/hiro/online/shouzhu/newpackagename com.test.appstore
+   cd /Users/hiro/Documents/workspaces
+   rp r qihoapptore --package-name cn.hiroz.appstore --with-providers --with-actions --with-processes
    ```
+
+## Help
+
+   You can use the following cmmand to get more help:
+
+   ```
+   rp r --help
+   ```
+
+   Including all the options arguments:
+
+   ```
+   -h, --help                 output usage information
+   -p, --package-name <name>  set new package name
+   --with-providers           modify provider authorities. default is false
+   --with-actions             modify action name. default is false
+   --with-processes           modify services, provider, receiver process name. default is false
+   --prjtype <type>           is either a eclipse project or android studio project
+   --main-project <dir>       set main project, when hava many library.
+   -P, --policy <jsconfig>    Custom rename policy via javascript file.
+   ```
+
+## Custom
+
+   This tool support the custom policy. Document is comming soon.
 
 ## Copyrights
 
-   Copyright 2015, Hiro (hiroz.cn)
+   The MIT License (MIT)
 
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
+   Copyright (c) 2015 Hiro (hiroz.cn)
 
-       http://www.apache.org/licenses/LICENSE-2.0
+   Permission is hereby granted, free of charge, to any person obtaining a copy
+   of this software and associated documentation files (the "Software"), to deal
+   in the Software without restriction, including without limitation the rights
+   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+   copies of the Software, and to permit persons to whom the Software is
+   furnished to do so, subject to the following conditions:
 
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
+   The above copyright notice and this permission notice shall be included in all
+   copies or substantial portions of the Software.
+
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+   AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+   SOFTWARE.
