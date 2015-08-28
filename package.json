@@ -21,7 +21,6 @@
   "license": "Apache",
   "dependencies": {
         "node-expat": "~ 2.3.8",
-        "q": "~ 1.4.1",
         "commander" : "~ 2.8.1"
   },
   "rp" : {
