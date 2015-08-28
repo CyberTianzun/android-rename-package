@@ -2,6 +2,8 @@
 
 ## Introduction
 
+   [中文版本](http://hiroz.cn/android-rename-package-readme/)
+
    This is a CLI tools for renaming android app package name with code.
 
 ## Installation
